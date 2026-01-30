@@ -4,6 +4,7 @@ const Store = {
         teachers: [],
         fees: [],
         attendance: [],
+        teacherAttendance: [],
         auditLogs: [],
         settings: {
             principalName: 'abdulahi abdi',
@@ -58,12 +59,12 @@ const Store = {
             });
         }
 
-        // Force re-seed if it's currently demo data OR empty
+        // Force re-seed if it's currently demo data OR empty OR old version
         const isDemo = this.state.settings && this.state.settings.principalName === 'maxamed maxamed abdi';
-        if (this.state.students.length < 50 || !this.state.dataVersion || this.state.dataVersion < 4 || isDemo) {
+        if (this.state.students.length !== 120 || !this.state.dataVersion || this.state.dataVersion < 10 || isDemo) {
             console.log('🔄 Checking for local data recovery file...');
             const recovered = await this.loadRecoveredData();
-            if (!recovered && this.state.students.length < 50) {
+            if (!recovered && this.state.students.length !== 120) {
                 this.seedData();
             }
         }
@@ -322,7 +323,7 @@ const Store = {
             studentId,
             month,
             year,
-            amount: 50, // UPDATED TO $50
+            amount: 20, // UPDATED TO $20
             amountPaid: 0,
             status: 'UNPAID',
             datePaid: null
@@ -529,7 +530,7 @@ const Store = {
 
     // --- Seeding ---
     seedData() {
-        this.state.dataVersion = 5;
+        this.state.dataVersion = 10; // Updated version
         this.state.settings = {
             principalName: 'abdulahi abdi',
             headTeachers: {
@@ -560,17 +561,25 @@ const Store = {
         const DORMS = ["Dorm 1", "Dorm 2", "Dorm 3", "Dorm 4"];
         let idCounter = 1000;
 
+        // Create exactly 120 students: 30 per form, 15 per section
         GRADES.forEach(grade => {
             SECTIONS.forEach(section => {
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < 15; i++) {
                     const fname = firstNames[Math.floor(Math.random() * firstNames.length)];
                     const lname = lastNames[Math.floor(Math.random() * lastNames.length)];
 
                     // Assign dorms based on index to ensure even distribution
                     const dorm = DORMS[Math.floor(Math.random() * DORMS.length)];
 
-                    // Exactly 5 students per section are "Free Fee"
-                    const isFree = i < 5;
+                    // Free Fee Distribution: F1(4), F2(3), F3(5), F4(4) = 16 total
+                    // Only first section (A) gets free students to avoid duplication
+                    let isFree = false;
+                    if (section === "A") {
+                        if (grade === "Form 1" && i < 4) isFree = true;
+                        else if (grade === "Form 2" && i < 3) isFree = true;
+                        else if (grade === "Form 3" && i < 5) isFree = true;
+                        else if (grade === "Form 4" && i < 4) isFree = true;
+                    }
 
                     const student = {
                         id: `STU-${idCounter++}`,
@@ -626,20 +635,21 @@ const Store = {
                     amount: 20,
                     amountPaid: isPaid ? 20 : 0,
                     status: isPaid ? "PAID" : "UNPAID",
-                    dueDate: `2026-0${idx + 1}-05`
+                    dueDate: `2026-0${idx + 1}-05`,
+                    year: this.state.currentYear
                 });
             });
         });
 
-        this.logAction('System', 'Database initialized with AL-Huda data version 4 (Dorms & Settings)');
+        this.logAction('System', 'Database initialized with Al-Huda Secondary School data (120 students, 4 teachers)');
 
-        // Seed Teachers
+        // Seed Teachers - Exactly 4 teachers with $250 salary each
         if (!this.state.teachers || this.state.teachers.length === 0) {
             this.state.teachers = [
-                { id: 'KT001', name: 'Abdirahmaan Ali Aadan', phone: '+252613609678', gender: 'Male', salary: 300.00, subject: 'Mathematics' },
-                { id: 'KT002', name: 'Fardowsa Mohamed', phone: '+252615554321', gender: 'Female', salary: 280.00, subject: 'Science' },
-                { id: 'KT003', name: 'Hassan Omar', phone: '+252617778899', gender: 'Male', salary: 320.00, subject: 'English' },
-                { id: 'KT004', name: 'Amina Yussuf', phone: '+252612223344', gender: 'Female', salary: 300.00, subject: 'Islamic Studies' }
+                { id: 'TCH001', name: 'Abdirahmaan Ali Aadan', phone: '+252613609678', gender: 'Male', salary: 250.00, subject: 'Mathematics', status: 'Active', joinDate: '2024-09-01' },
+                { id: 'TCH002', name: 'Fardowsa Mohamed Hassan', phone: '+252615554321', gender: 'Female', salary: 250.00, subject: 'Science', status: 'Active', joinDate: '2024-09-01' },
+                { id: 'TCH003', name: 'Hassan Omar Farah', phone: '+252617778899', gender: 'Male', salary: 250.00, subject: 'English', status: 'Active', joinDate: '2024-09-01' },
+                { id: 'TCH004', name: 'Amina Yussuf Ali', phone: '+252612223344', gender: 'Female', salary: 250.00, subject: 'Islamic Studies', status: 'Active', joinDate: '2024-09-01' }
             ];
         }
 
