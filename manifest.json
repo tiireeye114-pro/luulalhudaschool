@@ -1,7 +1,7 @@
 {
-  "name": "AL-Huda School Management",
-  "short_name": "AL-Huda",
-  "description": "School management system for AL-Huda school.",
+  "name": "Al-Huda Secondary School Management",
+  "short_name": "Al-Huda Secondary",
+  "description": "School management system for Al-Huda Secondary School.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#111827",

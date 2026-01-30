@@ -410,6 +410,11 @@
     <script>
         feather.replace();
 
+        // Initialize the application
+        window.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
